@@ -15,7 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DemoShoeShopApplication implements CommandLineRunner {
 
 	private static final Logger log = LoggerFactory.getLogger(DemoShoeShopApplication.class);
-
+// qualcosa è cambiato
 	@Autowired
 	ModelRepo modelRepo;
 	@Autowired
