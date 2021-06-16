@@ -4,7 +4,10 @@ import com.example.demoShoeShop.DemoShoeShopApplication;
 import com.example.demoShoeShop.dataTransfertObj.ModelDto;
 import com.example.demoShoeShop.entities.Model;
 import com.example.demoShoeShop.entities.Shoe;
+import com.example.demoShoeShop.entities.User;
 import com.example.demoShoeShop.exceptions.ObjNotFoundException;
+import com.example.demoShoeShop.exceptions.UserNotLoggedException;
+import com.example.demoShoeShop.services.LoginService;
 import com.example.demoShoeShop.services.ModelService;
 import com.example.demoShoeShop.services.ShoeService;
 import org.slf4j.Logger;
@@ -19,6 +22,8 @@ import org.springframework.web.server.ResponseStatusException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
+import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,9 +34,27 @@ public class ShoeShopController {
     ModelService modelService;
     @Autowired
     ShoeService shoeService;
+    @Autowired
+    LoginService loginService;
 
     private static final Logger log = LoggerFactory.getLogger(ShoeShopController.class);
 
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestParam(name = "username") String username, @RequestParam(name = "pwd") String pwd){
+        try {
+            User u = loginService.findUserAndVerifyPassword(username, pwd);
+            String jwt = loginService.createJwt(u.getUsername(),u.getName(),u.getPermission(), new Date());
+            return ResponseEntity.status(HttpStatus.OK).header("JWT", jwt).body("YEAH !! you are logged in!");
+        } catch (ObjNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
+        } catch (UserNotLoggedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
+        } catch (UnsupportedEncodingException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
+        }
+        // loginService.
+        //return ResponseEntity.status(HttpStatus.OK).header("JWT", )
+    }
 
     @GetMapping("/models")
     public ResponseEntity<List<Model>> getModels(){
