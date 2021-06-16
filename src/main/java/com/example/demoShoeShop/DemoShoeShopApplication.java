@@ -1,9 +1,12 @@
 package com.example.demoShoeShop;
 
+import com.example.demoShoeShop.Utils.Md5;
 import com.example.demoShoeShop.entities.Model;
 import com.example.demoShoeShop.entities.Shoe;
+import com.example.demoShoeShop.entities.User;
 import com.example.demoShoeShop.repositories.ModelRepo;
 import com.example.demoShoeShop.repositories.ShoeRepo;
+import com.example.demoShoeShop.repositories.UserRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,11 +18,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class DemoShoeShopApplication implements CommandLineRunner {
 
 	private static final Logger log = LoggerFactory.getLogger(DemoShoeShopApplication.class);
-// qualcosa è cambiato
+
 	@Autowired
 	ModelRepo modelRepo;
 	@Autowired
 	ShoeRepo shoeRepo;
+	@Autowired
+	UserRepo userRepo;
 
 	public static void main(String[] args) {
 		SpringApplication.run(DemoShoeShopApplication.class, args);
@@ -28,6 +33,13 @@ public class DemoShoeShopApplication implements CommandLineRunner {
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("Se mi vedi funziona il Logger");
+
+		userRepo.save(new User("supermario", Md5.encrypt("caramella"), "Mario Rossi", "seller"));
+		userRepo.save(new User("gigi86", Md5.encrypt("mortadella"), "Luigi Bianchi", "seller"));
+		userRepo.save(new User("lucyInTheSky", Md5.encrypt("mandarino"), "Lucia Tarantino", "owner"));
+		userRepo.save(new User("gianni90", Md5.encrypt("bacinella"), "Giovanni Verdi"));
+
+
 
 		Model m1 = new Model(123456, "stivale", "FairPair", 50);
 		Model m2 = new Model(456789, "ballerina", "FairPair", 50);

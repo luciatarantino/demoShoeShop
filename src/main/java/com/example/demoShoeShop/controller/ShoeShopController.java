@@ -35,6 +35,7 @@ public class ShoeShopController {
 
     @GetMapping("/models")
     public ResponseEntity<List<Model>> getModels(){
+
         List<Model> l = modelService.findAll();
         return new ResponseEntity<List<Model>>(l, HttpStatus.OK);
     }
