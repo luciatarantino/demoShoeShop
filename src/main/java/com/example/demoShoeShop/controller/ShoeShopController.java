@@ -20,6 +20,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.Positive;
 import java.io.UnsupportedEncodingException;
@@ -52,8 +53,7 @@ public class ShoeShopController {
         } catch (UnsupportedEncodingException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
         }
-        // loginService.
-        //return ResponseEntity.status(HttpStatus.OK).header("JWT", )
+
     }
 
     @GetMapping("/models")
@@ -70,16 +70,27 @@ public class ShoeShopController {
             return new ResponseEntity<Model>(m, HttpStatus.OK);
         } catch (ObjNotFoundException e) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "object not found");
+            //return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.toString());
         }
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updatePrice(@RequestParam(value = "id") Integer id, @RequestParam(value = "price") @Positive Float price){
+    public ResponseEntity<String> updatePrice(HttpServletRequest request, @RequestParam(value = "id") Integer id, @RequestParam(value = "price") @Positive Float price){
         try{
-            modelService.updatePrice(id,price);
-            return new ResponseEntity<String>("SUCCESS - obj price updated", HttpStatus.OK);
+            Map<String, Object> data = loginService.verifyJwtAndGetData(request);
+            if(data.get("scope").equals("seller") || data.get("scope").equals("owner")){
+                modelService.updatePrice(id,price);
+                return new ResponseEntity<String>("SUCCESS - obj price updated", HttpStatus.OK);
+            }else{
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body("non hai il permesso di aggiornare il catalogo");
+            }
+
         } catch (ObjNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "object not found");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.toString());
+        } catch (UserNotLoggedException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
+        } catch (UnsupportedEncodingException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
         }
     }
 
@@ -89,20 +100,6 @@ public class ShoeShopController {
         return ResponseEntity.ok("SUCCESS - Valid model added correctly");
     }
 
-
-//    @GetMapping("/storage")
-//    public ResponseEntity<Map<Model, List<Shoe>>> allInStorage(){
-//        Map<Model, List<Shoe>> storage = modelService.allInStorage();
-//        return new ResponseEntity<Map<Model, List<Shoe>>>(storage, HttpStatus.OK);
-//    }
-
-//  ****** EFFETTO SPECCHIO **********
-//    @GetMapping("/storage")
-//        public ResponseEntity<Map<Integer, Model>> allInStorage(){
-//        Map<Integer, Model> storage = modelService.allInStorage();
-//        return new ResponseEntity<Map<Integer, Model>>(storage, HttpStatus.OK);
-//    }
-    //Map<Integer, ModelDto>
 
     @GetMapping("/storage")
         public ResponseEntity<Map<Integer, ModelDto>> allInStorage(){
