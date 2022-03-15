@@ -1,6 +1,7 @@
 package com.example.demoShoeShop.controller;
 
 import com.example.demoShoeShop.DemoShoeShopApplication;
+import com.example.demoShoeShop.Utils.ResponseBodyStandard;
 import com.example.demoShoeShop.dataTransfertObj.ModelDto;
 import com.example.demoShoeShop.entities.Model;
 import com.example.demoShoeShop.entities.Shoe;
@@ -40,6 +41,11 @@ public class ShoeShopController {
 
     private static final Logger log = LoggerFactory.getLogger(ShoeShopController.class);
 
+    @GetMapping("/hello")
+    public String sayHello(){
+        return "Hello Lucia, you are very nice!";
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestParam(name = "username") String username, @RequestParam(name = "pwd") String pwd){
         try {
@@ -49,11 +55,14 @@ public class ShoeShopController {
         } catch (ObjNotFoundException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
         } catch (UserNotLoggedException e) {
+
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
         } catch (UnsupportedEncodingException e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.toString());
+        }catch (Exception e){
+            log.error("pippa ",e.toString());
+            return null;
         }
-
     }
 
     @GetMapping("/models")
@@ -64,13 +73,14 @@ public class ShoeShopController {
     }
 
     @GetMapping("/models/{id}")
-    public  ResponseEntity<Model> getModelById(@PathVariable(name = "id") int id){
+    public  ResponseEntity<ResponseBodyStandard> getModelById(@PathVariable(name = "id") int id){ // OK---->ResponseEntity<Object>
         try{
             Model m = modelService.findById(id);
-            return new ResponseEntity<Model>(m, HttpStatus.OK);
+            return ResponseEntity.status(HttpStatus.OK).body(new ResponseBodyStandard(200, m));
+            //return ResponseEntity.status(HttpStatus.OK).body(new ResponseBodyStandard(200, m));
         } catch (ObjNotFoundException e) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "object not found");
-            //return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.toString());
+            //throw new ResponseStatusException(HttpStatus.NOT_FOUND, "object not found");
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ResponseBodyStandard(404,"Citrullo il BARCODE non esiste"));
         }
     }
 
@@ -156,6 +166,28 @@ public class ShoeShopController {
         });
         return errors;
     }
+    /*
+    import it.infocamere.ospz.ospzLibCommon.exceptions.OsservaPrezziException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.ServletWebRequest;
+import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+@RestControllerAdvice
+public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
+    private static Logger log = LoggerFactory.getLogger(CustomExceptionHandler.class.getName());
+    @ExceptionHandler(OsservaPrezziException.class)
+    public final ResponseEntity<Object> handleOsservaPrezziException(OsservaPrezziException ex, WebRequest request) {
+        String path = ((ServletWebRequest) request).getRequest().getRequestURI();
+        log.info("Errore dal servizio remoto: {}", path);
+       return ResponseEntity.status(HttpStatus.valueOf(ex.getHttpCode())).build();
+    }
+}
+     */
 
 
 }
